@@ -1,19 +1,38 @@
-import { useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 
 export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null)
-  const handleClick = (e: any) => {
+  const [product, setProduct] = useState<
+    { id: string; properties: { id: string } }[]
+  >([])
+
+  useEffect(() => {
+    axios.get('/api/get-item').then((res) => setProduct([...res.data.item]))
+  }, [])
+
+  const handleClick = useCallback((e: any) => {
     e.preventDefault()
 
-    if (!inputRef.current || !inputRef.current.value) return
+    if (!inputRef.current || !inputRef.current.value) return alert('입력하시오')
 
     axios.get(`/api/add-item?name=${inputRef.current.value}`).then((res) => {
       console.log(res.data)
     })
-  }
+  }, [])
+
+  const handleDetail = useCallback(
+    (id: any, value: any) => (e: any) => {
+      axios
+        .get(`/api/get-detail?pageId=${id}&propertyId=${value}`)
+        .then((res) => {
+          console.log(res.data)
+        })
+    },
+    []
+  )
 
   return (
     <div className={styles.container}>
@@ -28,6 +47,27 @@ export default function Home() {
           <input type="text" ref={inputRef} placeholder="name" />
         </form>
         <button onClick={handleClick}>버튼 클릭</button>
+        {product &&
+          product.map((item) => {
+            return (
+              <div key={item.id}>
+                <div>{JSON.stringify(item)}</div>
+                {item.properties &&
+                  Object.entries(item.properties).map(([key, value]) => (
+                    <button key={key} onClick={handleDetail(item.id, value.id)}>
+                      {key}
+                    </button>
+                  ))}
+                <br />
+              </div>
+            )
+          })}
+        {/* <p key={product.id}>
+          {JSON.stringify(product)}
+          {}
+          <br />
+          <br />
+        </p> */}
       </main>
     </div>
   )
