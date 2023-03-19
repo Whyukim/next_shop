@@ -8,10 +8,11 @@ const notion = new Client({
 
 const databaseId = 'c38dd781f0a748fab5246609619e00b3'
 
-async function getItem() {
+async function getDetail(pageId: string, propertyId: string) {
   try {
-    const response = await notion.databases.retrieve({
-      database_id: databaseId,
+    const response = await notion.pages.properties.retrieve({
+      page_id: pageId,
+      property_id: propertyId,
     })
     return response
   } catch (error) {
@@ -29,9 +30,9 @@ export default async function handler(
   res: NextApiResponse<IHandle>
 ) {
   try {
-    const response = await getItem()
-    console.log(123, response)
-    // res.status(200).json({ item: response?.results, message: `success` })
+    const { pageId, propertyId } = req.query
+    const response = await getDetail(String(pageId), String(propertyId))
+    res.status(200).json({ item: response, message: `success` })
   } catch (error) {
     return res.status(400).json({ message: 'failed' })
   }

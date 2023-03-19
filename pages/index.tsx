@@ -6,7 +6,7 @@ import styles from '../styles/Home.module.css'
 export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null)
   const [product, setProduct] = useState<
-    { id: string; properties: { id: string } }[]
+    { id: string; properties: { id: any } }[]
   >([])
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export default function Home() {
   }, [])
 
   const handleDetail = useCallback(
-    (id: any, value: any) => (e: any) => {
+    (id: string, value: string) => () => {
       axios
         .get(`/api/get-detail?pageId=${id}&propertyId=${value}`)
         .then((res) => {
